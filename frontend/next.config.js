@@ -1,0 +1,51 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  // antd v5 and its rc-* deps ship ESM (es/) builds with extensionless imports that
+  // Node cannot require directly. Transpiling them makes Next bundle them into the
+  // server output as CJS, avoiding runtime require() of the es/ build.
+  transpilePackages: [
+    "antd",
+    "@ant-design/icons",
+    "@ant-design/icons-svg",
+    "@ant-design/cssinjs",
+    "@rc-component/util",
+    "rc-util",
+    "rc-pagination",
+    "rc-picker",
+    "rc-notification",
+    "rc-tooltip",
+    "rc-tree",
+    "rc-table",
+    "rc-input",
+    "rc-field-form",
+    "rc-dropdown",
+    "rc-menu",
+    "rc-select",
+    "rc-checkbox",
+    "rc-motion",
+    "rc-overflow",
+    "rc-dialog",
+    "rc-drawer",
+    "rc-collapse",
+    "rc-cascader",
+    "rc-tabs",
+    "rc-textarea",
+    "rc-trigger",
+    "rc-resize-observer",
+    "rc-virtual-list",
+    "rc-segmented",
+    "rc-switch",
+    "rc-slider",
+    "rc-steps",
+    "rc-rate",
+    "rc-progress",
+    "rc-image",
+    "rc-mentions",
+    "rc-upload",
+    "rc-tree-select",
+    "rc-input-number",
+  ],
+};
+
+module.exports = nextConfig;
