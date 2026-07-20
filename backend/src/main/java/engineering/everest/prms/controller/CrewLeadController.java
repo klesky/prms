@@ -11,10 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/crew-leads")
@@ -46,5 +49,22 @@ public class CrewLeadController {
 
         CrewLead crewLead = crewLeadService.registerCrewLead(request.getUsername(), request.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(CrewLeadMapper.MAPPER.entityToDto(crewLead));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('crew-lead')")
+    @Operation(summary = "List all crew leads",
+        description = "Crew-lead-only: returns the ship's administrators (up to 3).")
+    public List<CrewLeadDto> listCrewLeads() {
+        return CrewLeadMapper.MAPPER.entityToDtoList(crewLeadService.findAll());
+    }
+
+    @DeleteMapping("/{username}")
+    @PreAuthorize("hasRole('crew-lead') and @authService.isNotSelf(#username)")
+    @Operation(summary = "Delete a crew lead",
+        description = "Crew-lead-only: removes another crew lead. You cannot delete yourself.")
+    public ResponseEntity<Void> deleteCrewLead(@PathVariable String username) {
+        crewLeadService.deleteCrewLead(username);
+        return ResponseEntity.noContent().build();
     }
 }

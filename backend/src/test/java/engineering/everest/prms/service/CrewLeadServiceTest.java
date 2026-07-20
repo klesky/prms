@@ -2,6 +2,7 @@ package engineering.everest.prms.service;
 
 import engineering.everest.prms.entity.CrewLead;
 import engineering.everest.prms.exception.CrewLeadLimitExceededException;
+import engineering.everest.prms.exception.CrewLeadNotFoundException;
 import engineering.everest.prms.exception.DuplicateCrewLeadException;
 import engineering.everest.prms.repository.CrewLeadRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -68,5 +71,34 @@ class CrewLeadServiceTest {
             .isInstanceOf(DuplicateCrewLeadException.class);
 
         verify(crewLeadRepository, never()).save(any());
+    }
+
+    @Test
+    void findAll_returnsEveryCrewLead() {
+        List<CrewLead> expected = List.of(
+            CrewLead.builder().username("kc-1").name("Yun Yie Goh").build(),
+            CrewLead.builder().username("kc-2").name("Harris Mu'adzzam Shah").build());
+        when(crewLeadRepository.findAll()).thenReturn(expected);
+
+        assertThat(crewLeadService.findAll()).isEqualTo(expected);
+    }
+
+    @Test
+    void deleteCrewLead_removesAnExistingCrewLead() {
+        when(crewLeadRepository.existsById("kc-2")).thenReturn(true);
+
+        crewLeadService.deleteCrewLead("kc-2");
+
+        verify(crewLeadRepository).deleteById("kc-2");
+    }
+
+    @Test
+    void deleteCrewLead_throwsWhenCrewLeadDoesNotExist() {
+        when(crewLeadRepository.existsById("kc-2")).thenReturn(false);
+
+        assertThatThrownBy(() -> crewLeadService.deleteCrewLead("kc-2"))
+            .isInstanceOf(CrewLeadNotFoundException.class);
+
+        verify(crewLeadRepository, never()).deleteById(any());
     }
 }

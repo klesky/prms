@@ -77,4 +77,14 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.canUseResource(resourceId))
             .isInstanceOf(InsufficientMembershipLevelException.class);
     }
+
+    @Test
+    void isNotSelf_returnsFalseWhenUsernameMatchesTheCaller() {
+        assertThat(authService.isNotSelf(PASSENGER_USERNAME)).isFalse();
+    }
+
+    @Test
+    void isNotSelf_returnsTrueWhenUsernameDiffersFromTheCaller() {
+        assertThat(authService.isNotSelf("someone-else")).isTrue();
+    }
 }

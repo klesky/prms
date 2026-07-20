@@ -5,10 +5,14 @@ import engineering.everest.prms.entity.CrewLead;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper
 public interface CrewLeadMapper {
 
     CrewLeadMapper MAPPER = Mappers.getMapper(CrewLeadMapper.class);
 
     CrewLeadDto entityToDto(CrewLead crewLead);
+
+    List<CrewLeadDto> entityToDtoList(List<CrewLead> crewLeads);
 }

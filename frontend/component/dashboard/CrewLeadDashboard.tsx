@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
@@ -16,21 +17,34 @@ import {
 } from "antd";
 import {
   CrewLeadsService,
+  CrewLeadDto,
   PassengersService,
   PassengerDto,
   ResourcesService,
   ResourceDto,
 } from "open-api";
 import type { MembershipLevel } from "../../utils/authUtils";
+import { SessionData } from "../../utils/authUtils";
 import { MEMBERSHIP_LEVELS, membershipTagColor } from "../../utils/membership";
 import { getApiErrorMessage } from "../../utils/apiError";
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
 const CrewLeadDashboard = () => {
+  const { data } = useSession();
+  const session = data as SessionData;
   const queryClient = useQueryClient();
 
-  // --- Crew Leads: enforce-exactly-3 registration ---
+  // --- Crew Leads: list + enforce-exactly-3 registration ---
+  const {
+    data: crewLeads,
+    isLoading: crewLeadsLoading,
+    isError: crewLeadsError,
+  } = useQuery<CrewLeadDto[]>({
+    queryKey: ["crewLeads"],
+    queryFn: () => CrewLeadsService.listCrewLeads(),
+  });
+
   const [crewLeadModalOpen, setCrewLeadModalOpen] = useState(false);
   const [crewLeadForm] = Form.useForm();
   const [crewLeadError, setCrewLeadError] = useState<string | null>(null);
@@ -43,8 +57,18 @@ const CrewLeadDashboard = () => {
       setCrewLeadModalOpen(false);
       setCrewLeadError(null);
       crewLeadForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ["crewLeads"] });
     },
     onError: (err) => setCrewLeadError(getApiErrorMessage(err)),
+  });
+
+  const deleteCrewLead = useMutation({
+    mutationFn: (username: string) => CrewLeadsService.deleteCrewLead({ username }),
+    onSuccess: () => {
+      message.success("Crew lead removed");
+      queryClient.invalidateQueries({ queryKey: ["crewLeads"] });
+    },
+    onError: (err) => message.error(getApiErrorMessage(err)),
   });
 
   // --- Passengers: list, register, change membership level ---
@@ -55,6 +79,7 @@ const CrewLeadDashboard = () => {
   } = useQuery<PassengerDto[]>({
     queryKey: ["passengers"],
     queryFn: () => PassengersService.listPassengers(),
+    select: (data) => [...data].sort((a, b) => a.username.localeCompare(b.username)),
   });
 
   const [passengerModalOpen, setPassengerModalOpen] = useState(false);
@@ -121,18 +146,78 @@ const CrewLeadDashboard = () => {
       <Title level={3}>Crew Lead Dashboard</Title>
 
       <Card
-        title="Crew Leads"
+        title="Crew Leads (exactly 3 required)"
         extra={
-          <Button type="primary" onClick={() => setCrewLeadModalOpen(true)}>
+          <Button
+            type="primary"
+            disabled={(crewLeads?.length ?? 0) >= 3}
+            onClick={() => setCrewLeadModalOpen(true)}
+          >
             + Add Crew Lead
           </Button>
         }
         style={{ marginBottom: 20 }}
       >
-        <Paragraph type="secondary">
-          The ship allows exactly 3 crew leads; the backend rejects a 4th registration.
-          There's no directory endpoint yet, so the current roster isn't listed here.
-        </Paragraph>
+        {crewLeadsError ? (
+          <Alert type="error" showIcon message="Failed to load crew leads" />
+        ) : (
+          <div style={{ display: "flex", gap: 14 }}>
+            {crewLeadsLoading
+              ? [1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      border: "1px solid #f0f0f0",
+                      borderRadius: 6,
+                      padding: "12px 14px",
+                      background: "#fafafa",
+                      color: "#bfbfbf",
+                    }}
+                  >
+                    Loading…
+                  </div>
+                ))
+              : (crewLeads ?? []).map((c) => (
+                  <div
+                    key={c.username}
+                    style={{
+                      flex: 1,
+                      border: "1px solid #f0f0f0",
+                      borderRadius: 6,
+                      padding: "12px 14px",
+                      background: "#fafafa",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "space-between",
+                      gap: 8,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{c.name}</div>
+                      <div style={{ fontSize: 12, color: "#8c8c8c", marginTop: 2 }}>
+                        {c.username}
+                      </div>
+                    </div>
+                    {c.username !== session?.username && (
+                      <Popconfirm
+                        title="Remove this crew lead?"
+                        onConfirm={() => deleteCrewLead.mutate(c.username)}
+                      >
+                        <Button
+                          danger
+                          type="text"
+                          size="small"
+                          loading={deleteCrewLead.isPending && deleteCrewLead.variables === c.username}
+                        >
+                          Remove
+                        </Button>
+                      </Popconfirm>
+                    )}
+                  </div>
+                ))}
+          </div>
+        )}
         {crewLeadError && (
           <Alert
             type="error"
@@ -140,6 +225,7 @@ const CrewLeadDashboard = () => {
             message={crewLeadError}
             closable
             onClose={() => setCrewLeadError(null)}
+            style={{ marginTop: 16 }}
           />
         )}
       </Card>

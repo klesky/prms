@@ -32,4 +32,10 @@ public class AuthService {
         }
         return true;
     }
+
+    public boolean isNotSelf(String username) {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String currentUsername = jwt.getClaimAsString("preferred_username");
+        return !currentUsername.equals(username);
+    }
 }

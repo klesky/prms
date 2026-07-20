@@ -1,6 +1,7 @@
 package engineering.everest.prms.exception.handler;
 
 import engineering.everest.prms.exception.CrewLeadLimitExceededException;
+import engineering.everest.prms.exception.CrewLeadNotFoundException;
 import engineering.everest.prms.exception.DuplicateCrewLeadException;
 import engineering.everest.prms.exception.DuplicatePassengerException;
 import engineering.everest.prms.exception.InsufficientMembershipLevelException;
@@ -25,6 +26,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateCrewLeadException.class)
     public ResponseEntity<Object> handleDuplicateCrewLead(DuplicateCrewLeadException ex) {
         return problem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(CrewLeadNotFoundException.class)
+    public ResponseEntity<Object> handleCrewLeadNotFound(CrewLeadNotFoundException ex) {
+        return problem(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
