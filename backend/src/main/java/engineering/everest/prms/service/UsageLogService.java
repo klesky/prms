@@ -3,7 +3,6 @@ package engineering.everest.prms.service;
 import engineering.everest.prms.entity.Passenger;
 import engineering.everest.prms.entity.Resource;
 import engineering.everest.prms.entity.UsageLog;
-import engineering.everest.prms.exception.InsufficientMembershipLevelException;
 import engineering.everest.prms.repository.UsageLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,11 +25,6 @@ public class UsageLogService {
     public UsageLog recordUsage(String passengerUsername, UUID resourceId) {
         Passenger passenger = passengerService.findById(passengerUsername);
         Resource resource = resourceService.findById(resourceId);
-
-        if (!resource.isAccessibleTo(passenger.getMembershipLevel())) {
-            throw new InsufficientMembershipLevelException(resource.getName(), resource.getMinRequiredLevel(),
-                passenger.getMembershipLevel());
-        }
 
         return usageLogRepository.save(UsageLog.builder()
             .passenger(passenger)
