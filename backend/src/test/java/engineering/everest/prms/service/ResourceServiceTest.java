@@ -3,6 +3,7 @@ package engineering.everest.prms.service;
 import engineering.everest.prms.entity.Resource;
 import engineering.everest.prms.exception.ResourceNotFoundException;
 import engineering.everest.prms.repository.ResourceRepository;
+import engineering.everest.prms.repository.UsageLogRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,7 @@ import static engineering.everest.prms.entity.MembershipLevel.SILVER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,9 @@ class ResourceServiceTest {
 
     @Mock
     private ResourceRepository resourceRepository;
+
+    @Mock
+    private UsageLogRepository usageLogRepository;
 
     @InjectMocks
     private ResourceService resourceService;
@@ -41,12 +46,13 @@ class ResourceServiceTest {
     }
 
     @Test
-    void decommissionResource_deletesAnExistingResource() {
+    void decommissionResource_deletesTheResourceAndItsUsageHistory() {
         UUID resourceId = UUID.randomUUID();
         when(resourceRepository.existsById(resourceId)).thenReturn(true);
 
         resourceService.decommissionResource(resourceId);
 
+        verify(usageLogRepository).deleteByResourceId(resourceId);
         verify(resourceRepository).deleteById(resourceId);
     }
 
@@ -57,6 +63,9 @@ class ResourceServiceTest {
 
         assertThatThrownBy(() -> resourceService.decommissionResource(resourceId))
             .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(usageLogRepository, never()).deleteByResourceId(any());
+        verify(resourceRepository, never()).deleteById(any());
     }
 
     @Test

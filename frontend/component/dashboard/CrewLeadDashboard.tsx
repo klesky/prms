@@ -231,7 +231,7 @@ const CrewLeadDashboard = () => {
                 align: "right",
                 render: (_, record) => (
                   <Popconfirm
-                    title="Decommission this resource?"
+                    title="Decommission this resource? This will also delete the Usage Log history of the Resource."
                     onConfirm={() => record.id && decommissionResource.mutate(record.id)}
                   >
                     <Button danger size="small">
