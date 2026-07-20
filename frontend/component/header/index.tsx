@@ -1,4 +1,5 @@
 import { Button, Flex, Space, Tag, Typography } from "antd";
+import { LoginOutlined, LogoutOutlined } from "@ant-design/icons";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { keycloakSessionLogOut, SessionData } from "../../utils/authUtils";
@@ -63,10 +64,15 @@ const Header = () => {
                 {role}
               </Tag>
             ))}
-            <Button onClick={() => keycloakSessionLogOut(session?.id_token)}>Logout</Button>
+            <Button
+              icon={<LogoutOutlined />}
+              onClick={() => keycloakSessionLogOut(session?.id_token)}
+            >
+              Logout
+            </Button>
           </>
         ) : (
-          <Button type="primary" onClick={() => signIn("keycloak")}>
+          <Button type="primary" icon={<LoginOutlined />} onClick={() => signIn("keycloak")}>
             Login
           </Button>
         )}

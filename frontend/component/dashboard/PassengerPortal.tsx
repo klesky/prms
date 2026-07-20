@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { Alert, Button, Card, Col, Row, Spin, Tag, Typography, message } from "antd";
+import { HistoryOutlined, LockOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { PassengersService, ResourcesService, ResourceDto, UsageLogDto, UsageLogsService } from "open-api";
 import { SessionData } from "../../utils/authUtils";
@@ -95,6 +96,7 @@ const PassengerPortal = () => {
                       <Button
                         type="primary"
                         block
+                        icon={<ThunderboltOutlined />}
                         loading={isUsingThis}
                         onClick={() => resource.id && recordUsage.mutate(resource.id)}
                       >
@@ -115,7 +117,8 @@ const PassengerPortal = () => {
                         textAlign: "center",
                       }}
                     >
-                      🔒 Requires {resource.minRequiredLevel}
+                      <LockOutlined style={{ marginRight: 6 }} />
+                      Requires {resource.minRequiredLevel}
                     </div>
                   )}
                 </Card>
@@ -129,7 +132,15 @@ const PassengerPortal = () => {
         )}
       </Typography>
 
-      <Card size="small" title="Recent Activity">
+      <Card
+        size="small"
+        title={
+          <>
+            <HistoryOutlined style={{ marginRight: 8 }} />
+            Recent Activity
+          </>
+        }
+      >
         {recentActivity.length === 0 ? (
           <Text type="secondary">No resources used yet this session.</Text>
         ) : (

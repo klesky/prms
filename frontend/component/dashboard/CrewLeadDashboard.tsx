@@ -12,9 +12,21 @@ import {
   Select,
   Table,
   Tag,
+  Tooltip,
   Typography,
   message,
 } from "antd";
+import {
+  DatabaseOutlined,
+  EditOutlined,
+  PlusOutlined,
+  RocketOutlined,
+  StopOutlined,
+  TeamOutlined,
+  UserAddOutlined,
+  UserDeleteOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import {
   CrewLeadsService,
   CrewLeadDto,
@@ -97,11 +109,15 @@ const CrewLeadDashboard = () => {
     onError: (err) => message.error(getApiErrorMessage(err)),
   });
 
+  const [editingPassenger, setEditingPassenger] = useState<PassengerDto | null>(null);
+  const [membershipForm] = Form.useForm();
+
   const changeMembershipLevel = useMutation({
     mutationFn: ({ username, level }: { username: string; level: MembershipLevel }) =>
       PassengersService.changeMembershipLevel({ username, requestBody: level }),
     onSuccess: (dto) => {
       message.success(`${dto.name} is now ${dto.membershipLevel}`);
+      setEditingPassenger(null);
       queryClient.invalidateQueries({ queryKey: ["passengers"] });
     },
     onError: (err) => message.error(getApiErrorMessage(err)),
@@ -143,17 +159,26 @@ const CrewLeadDashboard = () => {
 
   return (
     <Typography>
-      <Title level={3}>Crew Lead Dashboard</Title>
+      <Title level={3}>
+        <RocketOutlined style={{ marginRight: 10 }} />
+        Crew Lead Dashboard
+      </Title>
 
       <Card
-        title="Crew Leads (exactly 3 required)"
+        title={
+          <>
+            <TeamOutlined style={{ marginRight: 8 }} />
+            Crew Leads (exactly 3 required)
+          </>
+        }
         extra={
           <Button
             type="primary"
+            icon={<UserAddOutlined />}
             disabled={(crewLeads?.length ?? 0) >= 3}
             onClick={() => setCrewLeadModalOpen(true)}
           >
-            + Add Crew Lead
+            Add Crew Lead
           </Button>
         }
         style={{ marginBottom: 20 }}
@@ -208,6 +233,7 @@ const CrewLeadDashboard = () => {
                           danger
                           type="text"
                           size="small"
+                          icon={<UserDeleteOutlined />}
                           loading={deleteCrewLead.isPending && deleteCrewLead.variables === c.username}
                         >
                           Remove
@@ -231,10 +257,15 @@ const CrewLeadDashboard = () => {
       </Card>
 
       <Card
-        title="Passengers"
+        title={
+          <>
+            <UserOutlined style={{ marginRight: 8 }} />
+            Passengers
+          </>
+        }
         extra={
-          <Button type="primary" onClick={() => setPassengerModalOpen(true)}>
-            + Add Passenger
+          <Button type="primary" icon={<UserAddOutlined />} onClick={() => setPassengerModalOpen(true)}>
+            Add Passenger
           </Button>
         }
         style={{ marginBottom: 20 }}
@@ -263,21 +294,16 @@ const CrewLeadDashboard = () => {
                 key: "actions",
                 align: "right",
                 render: (_, record) => (
-                  <Select<MembershipLevel>
-                    value={record.membershipLevel}
-                    style={{ width: 140 }}
-                    disabled={
-                      changeMembershipLevel.isPending &&
-                      changeMembershipLevel.variables?.username === record.username
-                    }
-                    onChange={(level) => changeMembershipLevel.mutate({ username: record.username, level })}
-                  >
-                    {MEMBERSHIP_LEVELS.map((level) => (
-                      <Select.Option key={level} value={level}>
-                        {level}
-                      </Select.Option>
-                    ))}
-                  </Select>
+                  <Tooltip title="Change membership level">
+                    <Button
+                      shape="circle"
+                      icon={<EditOutlined />}
+                      onClick={() => {
+                        setEditingPassenger(record);
+                        membershipForm.setFieldsValue({ membershipLevel: record.membershipLevel });
+                      }}
+                    />
+                  </Tooltip>
                 ),
               },
             ]}
@@ -286,10 +312,15 @@ const CrewLeadDashboard = () => {
       </Card>
 
       <Card
-        title="Ship Resources"
+        title={
+          <>
+            <DatabaseOutlined style={{ marginRight: 8 }} />
+            Ship Resources
+          </>
+        }
         extra={
-          <Button type="primary" onClick={() => setResourceModalOpen(true)}>
-            + Add Resource
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setResourceModalOpen(true)}>
+            Add Resource
           </Button>
         }
       >
@@ -320,7 +351,7 @@ const CrewLeadDashboard = () => {
                     title="Decommission this resource? This will also delete the Usage Log history of the Resource."
                     onConfirm={() => record.id && decommissionResource.mutate(record.id)}
                   >
-                    <Button danger size="small">
+                    <Button danger size="small" icon={<StopOutlined />}>
                       Decommission
                     </Button>
                   </Popconfirm>
@@ -332,7 +363,12 @@ const CrewLeadDashboard = () => {
       </Card>
 
       <Modal
-        title="Add Crew Lead"
+        title={
+          <>
+            <UserAddOutlined style={{ marginRight: 8 }} />
+            Add Crew Lead
+          </>
+        }
         open={crewLeadModalOpen}
         onCancel={() => setCrewLeadModalOpen(false)}
         onOk={() => crewLeadForm.submit()}
@@ -353,7 +389,12 @@ const CrewLeadDashboard = () => {
       </Modal>
 
       <Modal
-        title="Add Passenger"
+        title={
+          <>
+            <UserAddOutlined style={{ marginRight: 8 }} />
+            Add Passenger
+          </>
+        }
         open={passengerModalOpen}
         onCancel={() => setPassengerModalOpen(false)}
         onOk={() => passengerForm.submit()}
@@ -384,7 +425,12 @@ const CrewLeadDashboard = () => {
       </Modal>
 
       <Modal
-        title="Add Resource"
+        title={
+          <>
+            <PlusOutlined style={{ marginRight: 8 }} />
+            Add Resource
+          </>
+        }
         open={resourceModalOpen}
         onCancel={() => setResourceModalOpen(false)}
         onOk={() => resourceForm.submit()}
@@ -400,6 +446,42 @@ const CrewLeadDashboard = () => {
             <Input />
           </Form.Item>
           <Form.Item name="minRequiredLevel" label="Minimum level" rules={[{ required: true }]}>
+            <Select>
+              {MEMBERSHIP_LEVELS.map((level) => (
+                <Select.Option key={level} value={level}>
+                  {level}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={
+          <>
+            <EditOutlined style={{ marginRight: 8 }} />
+            Change Membership Level
+            {editingPassenger ? ` — ${editingPassenger.name}` : ""}
+          </>
+        }
+        open={!!editingPassenger}
+        onCancel={() => setEditingPassenger(null)}
+        onOk={() => membershipForm.submit()}
+        confirmLoading={changeMembershipLevel.isPending}
+      >
+        <Form
+          form={membershipForm}
+          layout="vertical"
+          onFinish={(values) =>
+            editingPassenger &&
+            changeMembershipLevel.mutate({
+              username: editingPassenger.username,
+              level: values.membershipLevel,
+            })
+          }
+        >
+          <Form.Item name="membershipLevel" label="Membership Level" rules={[{ required: true }]}>
             <Select>
               {MEMBERSHIP_LEVELS.map((level) => (
                 <Select.Option key={level} value={level}>
