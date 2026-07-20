@@ -7,6 +7,8 @@ import engineering.everest.prms.dto.mapper.ResourceMapper;
 import engineering.everest.prms.entity.MembershipLevel;
 import engineering.everest.prms.entity.Passenger;
 import engineering.everest.prms.service.PassengerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/passengers")
 @CrossOrigin
+@Tag(name = "Passengers", description = "Ship passengers who access resources permitted by their membership level.")
 public class PassengerController {
 
     @Autowired
@@ -30,6 +33,8 @@ public class PassengerController {
 
     @PostMapping
     @PreAuthorize("hasRole('crew-lead')")
+    @Operation(summary = "Register a passenger",
+        description = "Crew-lead-only: creates a passenger profile with an initial membership level.")
     public ResponseEntity<PassengerDto> registerPassenger(@Valid @RequestBody PassengerDto request) {
         Passenger passenger = passengerService.registerPassenger(request.getUsername(), request.getName(),
             request.getMembershipLevel());
@@ -38,12 +43,17 @@ public class PassengerController {
 
     @PatchMapping("/{username}/membership-level")
     @PreAuthorize("hasRole('crew-lead')")
+    @Operation(summary = "Change a passenger's membership level",
+        description = "Crew-lead-only: upgrades or downgrades a passenger's tier (SILVER, GOLD, or PLATINUM).")
     public PassengerDto changeMembershipLevel(@PathVariable String username, @RequestBody MembershipLevel membershipLevel) {
         Passenger passenger = passengerService.changeMembershipLevel(username, membershipLevel);
         return PassengerMapper.MAPPER.entityToDto(passenger);
     }
 
     @GetMapping("/{username}/resources")
+    @Operation(summary = "List a passenger's accessible resources",
+        description = "Returns the resources permitted by the passenger's current membership level (higher tiers "
+            + "inherit lower-tier access). Callable by the passenger themselves or any crew lead.")
     public List<ResourceDto> getAccessibleResources(@PathVariable String username, Authentication authentication) {
         Passenger passenger = passengerService.findById(username);
         requireSelfOrCrewLead(passenger, authentication);

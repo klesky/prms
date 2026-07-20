@@ -4,6 +4,8 @@ import engineering.everest.prms.dto.CrewLeadDto;
 import engineering.everest.prms.dto.mapper.CrewLeadMapper;
 import engineering.everest.prms.entity.CrewLead;
 import engineering.everest.prms.service.CrewLeadService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/crew-leads")
 @CrossOrigin
+@Tag(name = "Crew Leads", description = "Ship administrators who manage passengers, resources and membership tiers.")
 public class CrewLeadController {
 
     @Autowired
@@ -28,6 +31,9 @@ public class CrewLeadController {
      * else's behalf requires already being a crew lead.
      */
     @PostMapping
+    @Operation(summary = "Register a crew lead",
+        description = "Self-registers the caller as a crew lead while a seat remains open (max 3 ship-wide), "
+            + "or lets an existing crew lead register someone else.")
     public ResponseEntity<CrewLeadDto> registerCrewLead(@Valid @RequestBody CrewLeadDto request,
                                                           Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
