@@ -1,0 +1,79 @@
+package engineering.everest.prms.controller;
+
+import engineering.everest.prms.dto.ResourceDto;
+import engineering.everest.prms.support.AbstractIntegrationTest;
+import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
+
+import static engineering.everest.prms.entity.MembershipLevel.SILVER;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+class ResourceControllerTest extends AbstractIntegrationTest {
+
+    @Test
+    void provisionResource_succeedsForACrewLead() throws Exception {
+        givenCrewLead("kc-1", "Yun Yie Goh");
+
+        mockMvc.perform(post("/api/resources")
+                .with(jwtFor("kc-1"))
+                .with(csrf())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(ResourceDto.builder().name("Sleeping Pod").minRequiredLevel(SILVER).build())))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name", is("Sleeping Pod")))
+            .andExpect(jsonPath("$.minRequiredLevel", is("SILVER")));
+    }
+
+    @Test
+    void provisionResource_rejectedForAPassenger() throws Exception {
+        givenPassenger("kc-2", "Naavin Balayah", SILVER);
+
+        mockMvc.perform(post("/api/resources")
+                .with(jwtFor("kc-2"))
+                .with(csrf())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(ResourceDto.builder().name("Sleeping Pod").minRequiredLevel(SILVER).build())))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void decommissionResource_returns404ForAnUnknownResource() throws Exception {
+        givenCrewLead("kc-1", "Yun Yie Goh");
+
+        mockMvc.perform(delete("/api/resources/{id}", UUID.randomUUID())
+                .with(jwtFor("kc-1"))
+                .with(csrf()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void listResources_isVisibleToAnyAuthenticatedUser() throws Exception {
+        givenCrewLead("kc-1", "Yun Yie Goh");
+        givenPassenger("kc-2", "Naavin Balayah", SILVER);
+
+        mockMvc.perform(post("/api/resources")
+                .with(jwtFor("kc-1"))
+                .with(csrf())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(ResourceDto.builder().name("Food Station").minRequiredLevel(SILVER).build())))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/resources").with(jwtFor("kc-2")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void listResources_rejectedWhenUnauthenticated() throws Exception {
+        mockMvc.perform(get("/api/resources"))
+            .andExpect(status().isUnauthorized());
+    }
+}

@@ -1,0 +1,167 @@
+{
+  "realm": "RIFTKeycloak",
+  "users": [
+    {
+      "id": "a9b7df51-9792-4e17-8fa3-228eb5a90769",
+      "createdTimestamp": 1695372423052,
+      "username": "yg91185",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Yun Yie",
+      "lastName": "Goh",
+      "email": "yun.yie-goh@prms.com",
+      "credentials": [
+        {
+          "id": "245ec4c1-2b84-473b-8c84-4c463ce17a26",
+          "type": "password",
+          "createdDate": 1696229727339,
+          "secretData": "{\"value\":\"Z74OOh8B1fm8uf85zdll/P5m9zTQdBeFtkrEkdtqCKd07cMFhoxR0bkdRUf2Fj58vDLR0c+Fc9KbfbOv6GuXlg==\",\"salt\":\"yrKz4nfhCe3ytfwMEN2rWA==\",\"additionalParameters\":{}}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-master"
+      ],
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "c26f7c45-5a51-4dc0-9a72-0e172bdabe52",
+      "createdTimestamp": 1695372450072,
+      "username": "mh91004",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Harris Fadhillah",
+      "lastName": "Mu'adzzam Shah",
+      "email": "harris.fadhillah-mshah@prms.com.my",
+      "credentials": [
+        {
+          "id": "f1016b76-bb39-4829-9ee7-040c61b2401f",
+          "type": "password",
+          "createdDate": 1696229740674,
+          "secretData": "{\"value\":\"BhcfCvoFVOdFAxJwDiPoM0sC1G6V8yHeeB5V1AKwxesxBnBxnNxIlqX9zamMWXrE1OzWB5qJPkaYa4a90vUvpg==\",\"salt\":\"UhNs21G02QU3cGOS/y4LYw==\",\"additionalParameters\":{}}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-master"
+      ],
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "d1d27c11-e69e-4400-8ff0-e30516c9fa03",
+      "createdTimestamp": 1695362061652,
+      "username": "bn89820",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Naavin",
+      "lastName": "Balayah",
+      "email": "naavin-balayah@prms.com.my",
+      "credentials": [
+        {
+          "id": "47a0ae67-472d-4480-8866-197a27ab3801",
+          "type": "password",
+          "createdDate": 1696229753747,
+          "secretData": "{\"value\":\"r4W9K8MDCu+viyEFejsP+mZoi5mBkL2H5MxT/CmKl9GzGcnNU3RmQJcs9ge3OfGrbX6oqY6n/f8EO+vQbPiqYw==\",\"salt\":\"rH/sOehFZPqCJvRRmK6P0A==\",\"additionalParameters\":{}}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-master"
+      ],
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "1eb1fcee-9b4c-4eb8-8db6-ad0081706565",
+      "createdTimestamp": 1695372554791,
+      "username": "mp89242",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Paul Singaraj",
+      "lastName": "Melvin Raj",
+      "email": "melvin.raj-psingaraj@prms.com.my",
+      "credentials": [
+        {
+          "id": "511099d9-74c2-450a-aa5e-b4f0f4fdf353",
+          "type": "password",
+          "createdDate": 1696229765111,
+          "secretData": "{\"value\":\"7QAAP+EN+DAXdNiTZeSqLNfHDa3FNIOtih8w8i/I9V54lo4OU4d5Ygv47WkorzV5MIzMMCZ7b79DK9EJu9m/SA==\",\"salt\":\"ILFSjKJZBLxz8pWH0OejUQ==\",\"additionalParameters\":{}}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-master"
+      ],
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "9a84c2e7-6fce-4553-9056-86b3d4199afc",
+      "createdTimestamp": 1695372333097,
+      "username": "so90667",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Soon Yoong",
+      "lastName": "Ooi",
+      "email": "soon.yoon-ooi@prms.com.my",
+      "credentials": [
+        {
+          "id": "8e404501-a25c-4641-9d32-af54e78f06a7",
+          "type": "password",
+          "createdDate": 1696229783920,
+          "secretData": "{\"value\":\"vDiXU9dSNvISR9OEP+THf7urLgEORuyC/DaDXc6aWJCUVLQDf0ua4dvjKxYnA0Kzmj5OA/vezoQlx6AGcoKTOg==\",\"salt\":\"v5N5txCOvKjUi5XK5bFuUA==\",\"additionalParameters\":{}}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-master"
+      ],
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "fa9ba433-6464-4a69-8122-d339b2121a39",
+      "createdTimestamp": 1695371996404,
+      "username": "zc90663",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "Ze Yen",
+      "lastName": "Chai",
+      "email": "ze.yen-chai@prms.com.my",
+      "credentials": [
+        {
+          "id": "0dcaefbd-4881-42a0-9c6b-30db560098d0",
+          "type": "password",
+          "createdDate": 1696229897068,
+          "secretData": "{\"value\":\"k8uiIhku0T13ONPQImVRObi+6Ycv4AykyhmIAol5I26xVsSAEYgzEtF9TDMZM+6lc6UwLuNwlxd3X+88qgHYuw==\",\"salt\":\"KzGZQkAyHrtQlg/DZhLAsg==\",\"additionalParameters\":{}}",
+          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        }
+      ],
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-master"
+      ],
+      "notBefore": 0,
+      "groups": []
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: prms
+
+  datasource:
+    url: jdbc:postgresql://localhost:6500/prms
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9080/auth/realms/RIFTKeycloak
+
+server:
+  port: 8080
+
+prms:
+  max-crew-leads: 3
