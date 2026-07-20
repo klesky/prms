@@ -9,7 +9,6 @@ import {
   Modal,
   Popconfirm,
   Select,
-  Space,
   Table,
   Tag,
   Typography,
@@ -26,7 +25,7 @@ import type { MembershipLevel } from "../../utils/authUtils";
 import { MEMBERSHIP_LEVELS, membershipTagColor } from "../../utils/membership";
 import { getApiErrorMessage } from "../../utils/apiError";
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
 const CrewLeadDashboard = () => {
   const queryClient = useQueryClient();
@@ -48,33 +47,37 @@ const CrewLeadDashboard = () => {
     onError: (err) => setCrewLeadError(getApiErrorMessage(err)),
   });
 
-  // --- Passengers: register + change membership level (no list endpoint yet) ---
+  // --- Passengers: list, register, change membership level ---
+  const {
+    data: passengers,
+    isLoading: passengersLoading,
+    isError: passengersError,
+  } = useQuery<PassengerDto[]>({
+    queryKey: ["passengers"],
+    queryFn: () => PassengersService.listPassengers(),
+  });
+
   const [passengerModalOpen, setPassengerModalOpen] = useState(false);
   const [passengerForm] = Form.useForm();
-  const [lastRegisteredPassenger, setLastRegisteredPassenger] = useState<PassengerDto | null>(null);
 
   const registerPassenger = useMutation({
     mutationFn: (requestBody: { username: string; name: string; membershipLevel: MembershipLevel }) =>
       PassengersService.registerPassenger({ requestBody }),
     onSuccess: (dto) => {
       message.success(`Registered ${dto.name} as a passenger`);
-      setLastRegisteredPassenger(dto);
       setPassengerModalOpen(false);
       passengerForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ["passengers"] });
     },
     onError: (err) => message.error(getApiErrorMessage(err)),
   });
-
-  const [levelForm] = Form.useForm();
-  const [lastLevelChange, setLastLevelChange] = useState<PassengerDto | null>(null);
 
   const changeMembershipLevel = useMutation({
     mutationFn: ({ username, level }: { username: string; level: MembershipLevel }) =>
       PassengersService.changeMembershipLevel({ username, requestBody: level }),
     onSuccess: (dto) => {
-      message.success(`${dto.username} is now ${dto.membershipLevel}`);
-      setLastLevelChange(dto);
-      levelForm.resetFields(["username"]);
+      message.success(`${dto.name} is now ${dto.membershipLevel}`);
+      queryClient.invalidateQueries({ queryKey: ["passengers"] });
     },
     onError: (err) => message.error(getApiErrorMessage(err)),
   });
@@ -141,64 +144,59 @@ const CrewLeadDashboard = () => {
         )}
       </Card>
 
-      <Card title="Passengers" style={{ marginBottom: 20 }}>
-        <Space direction="vertical" style={{ width: "100%" }} size={20}>
-          <div>
-            <Space align="center" style={{ marginBottom: 8 }}>
-              <Text strong>Register a passenger</Text>
-              <Button size="small" type="primary" onClick={() => setPassengerModalOpen(true)}>
-                + Add Passenger
-              </Button>
-            </Space>
-            {lastRegisteredPassenger && (
-              <Paragraph type="secondary" style={{ marginBottom: 0 }}>
-                Last registered: <Text code>{lastRegisteredPassenger.username}</Text>{" "}
-                ({lastRegisteredPassenger.name}) —{" "}
-                <Tag color={membershipTagColor[lastRegisteredPassenger.membershipLevel]}>
-                  {lastRegisteredPassenger.membershipLevel}
-                </Tag>
-              </Paragraph>
-            )}
-          </div>
-
-          <div>
-            <Text strong>Change membership level</Text>
-            <Form
-              form={levelForm}
-              layout="inline"
-              style={{ marginTop: 8 }}
-              onFinish={(values) =>
-                changeMembershipLevel.mutate({ username: values.username, level: values.level })
-              }
-            >
-              <Form.Item name="username" rules={[{ required: true, message: "Username required" }]}>
-                <Input placeholder="Passenger username" />
-              </Form.Item>
-              <Form.Item name="level" rules={[{ required: true, message: "Level required" }]}>
-                <Select placeholder="New level" style={{ width: 140 }}>
-                  {MEMBERSHIP_LEVELS.map((level) => (
-                    <Select.Option key={level} value={level}>
-                      {level}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item>
-                <Button htmlType="submit" loading={changeMembershipLevel.isPending}>
-                  Update
-                </Button>
-              </Form.Item>
-            </Form>
-            {lastLevelChange && (
-              <Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0 }}>
-                <Text code>{lastLevelChange.username}</Text> ({lastLevelChange.name}) is now{" "}
-                <Tag color={membershipTagColor[lastLevelChange.membershipLevel]}>
-                  {lastLevelChange.membershipLevel}
-                </Tag>
-              </Paragraph>
-            )}
-          </div>
-        </Space>
+      <Card
+        title="Passengers"
+        extra={
+          <Button type="primary" onClick={() => setPassengerModalOpen(true)}>
+            + Add Passenger
+          </Button>
+        }
+        style={{ marginBottom: 20 }}
+      >
+        {passengersError ? (
+          <Alert type="error" showIcon message="Failed to load passengers" />
+        ) : (
+          <Table<PassengerDto>
+            rowKey="username"
+            loading={passengersLoading}
+            dataSource={passengers ?? []}
+            pagination={false}
+            columns={[
+              { title: "Username", dataIndex: "username", key: "username" },
+              { title: "Name", dataIndex: "name", key: "name" },
+              {
+                title: "Membership",
+                dataIndex: "membershipLevel",
+                key: "membershipLevel",
+                render: (level: MembershipLevel) => (
+                  <Tag color={membershipTagColor[level]}>{level}</Tag>
+                ),
+              },
+              {
+                title: "Actions",
+                key: "actions",
+                align: "right",
+                render: (_, record) => (
+                  <Select<MembershipLevel>
+                    value={record.membershipLevel}
+                    style={{ width: 140 }}
+                    disabled={
+                      changeMembershipLevel.isPending &&
+                      changeMembershipLevel.variables?.username === record.username
+                    }
+                    onChange={(level) => changeMembershipLevel.mutate({ username: record.username, level })}
+                  >
+                    {MEMBERSHIP_LEVELS.map((level) => (
+                      <Select.Option key={level} value={level}>
+                        {level}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                ),
+              },
+            ]}
+          />
+        )}
       </Card>
 
       <Card

@@ -10,6 +10,19 @@ import { request as __request } from "../core/request";
 
 export class PassengersService {
   /**
+   * List all passengers
+   * Crew-lead-only: returns every passenger and their current membership level, for use when picking who to upgrade or downgrade.
+   * @returns PassengerDto OK
+   * @throws ApiError
+   */
+  public static listPassengers(): CancelablePromise<Array<PassengerDto>> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/passengers",
+    });
+  }
+
+  /**
    * Register a passenger
    * Crew-lead-only: creates a passenger profile with an initial membership level.
    * @returns PassengerDto OK

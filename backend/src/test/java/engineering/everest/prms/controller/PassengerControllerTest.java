@@ -52,6 +52,31 @@ class PassengerControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void listPassengers_succeedsForACrewLead() throws Exception {
+        givenCrewLead("kc-1", "Yun Yie Goh");
+        givenPassenger("kc-9", "Naavin Balayah", SILVER);
+        givenPassenger("kc-10", "Someone Else", GOLD);
+
+        mockMvc.perform(get("/api/passengers").with(jwtFor("kc-1")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void listPassengers_rejectedForAPassenger() throws Exception {
+        givenPassenger("kc-9", "Naavin Balayah", SILVER);
+
+        mockMvc.perform(get("/api/passengers").with(jwtFor("kc-9")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void listPassengers_rejectedWhenUnauthenticated() throws Exception {
+        mockMvc.perform(get("/api/passengers"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void getAccessibleResources_filtersByMembershipLevelForThePassengerThemself() throws Exception {
         var passenger = givenPassenger("kc-9", "Naavin Balayah", SILVER);
         givenResource("Food Station", SILVER);

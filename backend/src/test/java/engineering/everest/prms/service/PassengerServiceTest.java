@@ -95,4 +95,14 @@ class PassengerServiceTest {
         assertThatThrownBy(() -> passengerService.changeMembershipLevel("kc-9", GOLD))
             .isInstanceOf(PassengerNotFoundException.class);
     }
+
+    @Test
+    void findAll_returnsEveryPassenger() {
+        List<Passenger> expected = List.of(
+            Passenger.builder().username("kc-9").name("Naavin Balayah").membershipLevel(SILVER).build(),
+            Passenger.builder().username("kc-10").name("Someone Else").membershipLevel(GOLD).build());
+        when(passengerRepository.findAll()).thenReturn(expected);
+
+        assertThat(passengerService.findAll()).isEqualTo(expected);
+    }
 }

@@ -41,6 +41,15 @@ public class PassengerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(PassengerMapper.MAPPER.entityToDto(passenger));
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('crew-lead')")
+    @Operation(summary = "List all passengers",
+        description = "Crew-lead-only: returns every passenger and their current membership level, for use when "
+            + "picking who to upgrade or downgrade.")
+    public List<PassengerDto> listPassengers() {
+        return PassengerMapper.MAPPER.entityToDtoList(passengerService.findAll());
+    }
+
     @PatchMapping("/{username}/membership-level")
     @PreAuthorize("hasRole('crew-lead')")
     @Operation(summary = "Change a passenger's membership level",

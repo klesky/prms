@@ -36,6 +36,10 @@ public class PassengerService {
             .orElseThrow(() -> new PassengerNotFoundException(username));
     }
 
+    public List<Passenger> findAll() {
+        return passengerRepository.findAll();
+    }
+
     public List<Resource> findAccessibleResourcesFor(String username) {
         Passenger passenger = findById(username);
         return resourceService.findAccessibleTo(passenger.getMembershipLevel());
