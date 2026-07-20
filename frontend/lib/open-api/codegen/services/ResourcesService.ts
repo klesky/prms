@@ -7,8 +7,10 @@ import type { CancelablePromise } from "../core/CancelablePromise";
 import { OpenAPI } from "../core/OpenAPI";
 import { request as __request } from "../core/request";
 
-export class ResourceControllerService {
+export class ResourcesService {
   /**
+   * List all resources
+   * Returns every resource on the ship, regardless of membership level.
    * @returns ResourceDto OK
    * @throws ApiError
    */
@@ -20,6 +22,8 @@ export class ResourceControllerService {
   }
 
   /**
+   * Provision a resource
+   * Crew-lead-only: adds a new resource to the ship's inventory with its minimum required membership level.
    * @returns ResourceDto OK
    * @throws ApiError
    */
@@ -37,6 +41,8 @@ export class ResourceControllerService {
   }
 
   /**
+   * Decommission a resource
+   * Crew-lead-only: permanently removes a resource from the ship's inventory.
    * @returns any OK
    * @throws ApiError
    */

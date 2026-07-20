@@ -10,8 +10,10 @@ export type { CrewLeadDto } from "./models/CrewLeadDto";
 export type { CurrentUserDto } from "./models/CurrentUserDto";
 export type { PassengerDto } from "./models/PassengerDto";
 export type { ResourceDto } from "./models/ResourceDto";
+export type { UsageLogDto } from "./models/UsageLogDto";
 
-export { CrewLeadControllerService } from "./services/CrewLeadControllerService";
-export { PassengerControllerService } from "./services/PassengerControllerService";
-export { ResourceControllerService } from "./services/ResourceControllerService";
+export { CrewLeadsService } from "./services/CrewLeadsService";
+export { PassengersService } from "./services/PassengersService";
+export { ResourcesService } from "./services/ResourcesService";
+export { UsageLogsService } from "./services/UsageLogsService";
 export { UserControllerService } from "./services/UserControllerService";

@@ -16,10 +16,10 @@ import {
   message,
 } from "antd";
 import {
-  CrewLeadControllerService,
-  PassengerControllerService,
+  CrewLeadsService,
+  PassengersService,
   PassengerDto,
-  ResourceControllerService,
+  ResourcesService,
   ResourceDto,
 } from "open-api";
 import type { MembershipLevel } from "../../utils/authUtils";
@@ -38,7 +38,7 @@ const CrewLeadDashboard = () => {
 
   const registerCrewLead = useMutation({
     mutationFn: (requestBody: { username: string; name: string }) =>
-      CrewLeadControllerService.registerCrewLead({ requestBody }),
+      CrewLeadsService.registerCrewLead({ requestBody }),
     onSuccess: (dto) => {
       message.success(`Registered ${dto.name} as a crew lead`);
       setCrewLeadModalOpen(false);
@@ -55,7 +55,7 @@ const CrewLeadDashboard = () => {
 
   const registerPassenger = useMutation({
     mutationFn: (requestBody: { username: string; name: string; membershipLevel: MembershipLevel }) =>
-      PassengerControllerService.registerPassenger({ requestBody }),
+      PassengersService.registerPassenger({ requestBody }),
     onSuccess: (dto) => {
       message.success(`Registered ${dto.name} as a passenger`);
       setLastRegisteredPassenger(dto);
@@ -70,7 +70,7 @@ const CrewLeadDashboard = () => {
 
   const changeMembershipLevel = useMutation({
     mutationFn: ({ username, level }: { username: string; level: MembershipLevel }) =>
-      PassengerControllerService.changeMembershipLevel({ username, requestBody: level }),
+      PassengersService.changeMembershipLevel({ username, requestBody: level }),
     onSuccess: (dto) => {
       message.success(`${dto.username} is now ${dto.membershipLevel}`);
       setLastLevelChange(dto);
@@ -86,7 +86,7 @@ const CrewLeadDashboard = () => {
     isError: resourcesError,
   } = useQuery<ResourceDto[]>({
     queryKey: ["resources"],
-    queryFn: () => ResourceControllerService.listResources(),
+    queryFn: () => ResourcesService.listResources(),
   });
 
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
@@ -94,7 +94,7 @@ const CrewLeadDashboard = () => {
 
   const provisionResource = useMutation({
     mutationFn: (requestBody: { name: string; minRequiredLevel: MembershipLevel }) =>
-      ResourceControllerService.provisionResource({ requestBody }),
+      ResourcesService.provisionResource({ requestBody }),
     onSuccess: (dto) => {
       message.success(`Provisioned "${dto.name}"`);
       setResourceModalOpen(false);
@@ -105,7 +105,7 @@ const CrewLeadDashboard = () => {
   });
 
   const decommissionResource = useMutation({
-    mutationFn: (resourceId: string) => ResourceControllerService.decommissionResource({ resourceId }),
+    mutationFn: (resourceId: string) => ResourcesService.decommissionResource({ resourceId }),
     onSuccess: () => {
       message.success("Resource decommissioned");
       queryClient.invalidateQueries({ queryKey: ["resources"] });

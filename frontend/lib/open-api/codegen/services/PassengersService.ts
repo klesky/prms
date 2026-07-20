@@ -8,8 +8,10 @@ import type { CancelablePromise } from "../core/CancelablePromise";
 import { OpenAPI } from "../core/OpenAPI";
 import { request as __request } from "../core/request";
 
-export class PassengerControllerService {
+export class PassengersService {
   /**
+   * Register a passenger
+   * Crew-lead-only: creates a passenger profile with an initial membership level.
    * @returns PassengerDto OK
    * @throws ApiError
    */
@@ -27,6 +29,8 @@ export class PassengerControllerService {
   }
 
   /**
+   * Change a passenger's membership level
+   * Crew-lead-only: upgrades or downgrades a passenger's tier (SILVER, GOLD, or PLATINUM).
    * @returns PassengerDto OK
    * @throws ApiError
    */
@@ -49,6 +53,8 @@ export class PassengerControllerService {
   }
 
   /**
+   * List a passenger's accessible resources
+   * Returns the resources permitted by the passenger's current membership level (higher tiers inherit lower-tier access). Callable by the passenger themselves or any crew lead.
    * @returns ResourceDto OK
    * @throws ApiError
    */
