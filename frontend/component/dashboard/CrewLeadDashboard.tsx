@@ -279,7 +279,12 @@ const CrewLeadDashboard = () => {
             rowKey="username"
             loading={passengersLoading}
             dataSource={passengers ?? []}
-            pagination={false}
+            pagination={{
+                defaultPageSize: 10,
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50'],
+                position: ['bottomRight']
+            }}
             columns={[
               { title: "Username", dataIndex: "username", key: "username" },
               { title: "Name", dataIndex: "name", key: "name" },
@@ -333,7 +338,12 @@ const CrewLeadDashboard = () => {
             rowKey="id"
             loading={resourcesLoading}
             dataSource={resources ?? []}
-            pagination={false}
+            pagination={{
+                defaultPageSize: 10,
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50'],
+                position: ['bottomRight']
+            }}
             columns={[
               { title: "Resource", dataIndex: "name", key: "name" },
               {
