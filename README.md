@@ -43,6 +43,7 @@ realm's seeded users into the app's own tables, so there's data to explore immed
 | `bn89820` | Passenger | SILVER |
 | `mp89242` | Passenger | GOLD |
 | `zc90663` | Passenger | PLATINUM |
+All default user password is **abc123**
 
 ### API docs
 
@@ -77,25 +78,25 @@ Next.js (Pages Router) frontend for the PRMS backend, authenticating against Key
 
 ### Prerequisites
 
-The PRMS backend and its Keycloak/Postgres must be running:
-
-```bash
-cd ../backend
-docker-compose up -d          # Keycloak :9080, Postgres :6500
-# then start the Spring Boot backend on :8080 (JDK 17)
-```
+- **Node.js 20** (`nvm use 20` — see `frontend/.nvmrc`). The build fails on Node 22+/24+:
+  antd v5's ESM (`es/`) build uses extensionless imports that Node's newer "require of
+  ESM" strictness rejects. `package.json` pins `engines.node` to `>=18 <21` as a guard.
+- npm (bundled with Node)
+- The PRMS backend and its Keycloak/Postgres running (refer to Backend > Setup)
 
 ### Setup
 
 ```bash
+cd frontend
+nvm use 20                     # or: nvm install 20
 cp .env.example .env.local     # then fill in secrets (already populated for local dev)
 npm install
 npm run dev                    # http://localhost:3000
 ```
 
 Open http://localhost:3000 — you'll be redirected to Keycloak. Log in with an existing
-realm user (e.g. `so90667`). The home page then calls `GET /api/resources` with your
-bearer token to confirm auth works end-to-end.
+realm user (see the table above). Crew leads land on the Crew Lead Dashboard; passengers
+land on the Passenger Portal.
 
 ### Configuration (`.env.local`)
 
@@ -107,11 +108,26 @@ bearer token to confirm auth works end-to-end.
 | `NEXT_PUBLIC_KEYCLOAK_END_SESSION_URL` | Keycloak logout endpoint (browser, non-secret) |
 | `NEXT_PUBLIC_API_BASE_URL` | PRMS backend base, e.g. `http://localhost:8080/api` |
 
+### API client
+
+`lib/open-api/` is an axios client generated from the backend's live OpenAPI spec (via
+`openapi-typescript-codegen`). Regenerate it whenever the backend's API contract changes
+(backend must be running on `:8080`):
+
+```bash
+npm run openapi:generate
+```
+
 ### How auth works
 
 - `pages/api/auth/[...nextauth].ts` — NextAuth + `KeycloakProvider`; `jwt` callback stores
   and refreshes tokens; `session` callback fetches `GET /api/users/me` for the caller's
   domain identity/roles.
 - `middleware.ts` — protects every route by default.
-- `component/auth/CheckSession.tsx` + `lib/apiClient.ts` — push the access token into the
-  axios client so client-side calls carry `Authorization: Bearer …`.
+- `component/auth/CheckSession.tsx` — pushes the access token into the generated client's
+  `OpenAPI.TOKEN` config so every API call carries `Authorization: Bearer …`.
+
+### Tech stack
+
+Next.js 14 (Pages Router) · React 18 · TypeScript · Ant Design 5 · TanStack React Query 4 ·
+NextAuth 4 · Chart.js 4 + react-chartjs-2 · openapi-typescript-codegen
