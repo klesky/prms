@@ -5,7 +5,7 @@
 
 Next.js (Pages Router) frontend for the PRMS backend, authenticating against Keycloak via NextAuth.
 
-## Prerequisites
+### Prerequisites
 
 The PRMS backend and its Keycloak/Postgres must be running:
 
@@ -15,7 +15,7 @@ docker-compose up -d          # Keycloak :9080, Postgres :6500
 # then start the Spring Boot backend on :8080 (JDK 17)
 ```
 
-## Setup
+### Setup
 
 ```bash
 cp .env.example .env.local     # then fill in secrets (already populated for local dev)
@@ -27,7 +27,7 @@ Open http://localhost:3000 — you'll be redirected to Keycloak. Log in with an 
 realm user (e.g. `so90667`). The home page then calls `GET /api/resources` with your
 bearer token to confirm auth works end-to-end.
 
-## Configuration (`.env.local`)
+### Configuration (`.env.local`)
 
 | Var | Purpose |
 | --- | --- |
@@ -37,7 +37,7 @@ bearer token to confirm auth works end-to-end.
 | `NEXT_PUBLIC_KEYCLOAK_END_SESSION_URL` | Keycloak logout endpoint (browser, non-secret) |
 | `NEXT_PUBLIC_API_BASE_URL` | PRMS backend base, e.g. `http://localhost:8080/api` |
 
-## How auth works
+### How auth works
 
 - `pages/api/auth/[...nextauth].ts` — NextAuth + `KeycloakProvider`; `jwt` callback stores
   and refreshes tokens; `session` callback fetches `GET /api/users/me` for the caller's
