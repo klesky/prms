@@ -1,5 +1,75 @@
 # PRMS
 
+Spaceship X26: Passenger Resource Management System — an Earth → Mars settlement mission
+kata. Crew Leads (max 3) manage passengers, resources, and membership tiers; passengers
+discover and use resources permitted by their tier (Silver/Gold/Platinum, higher tiers
+inherit lower-tier access); every interaction is validated in real time and logged for
+audit and reporting.
+
+## Backend
+
+Spring Boot REST API backed by PostgreSQL, with Keycloak handling authentication (JWTs
+prove identity only — crew-lead/passenger role and membership level are resolved fresh
+from our own DB on every request, since both change dynamically).
+
+### Prerequisites
+
+- JDK 17 (the build fails under newer JDKs — Lombok's annotation processor doesn't yet
+  support JDK 25/26)
+- Maven 3.9+ (developed against 3.9.16)
+- Docker (for Postgres + Keycloak)
+
+### Setup
+
+```bash
+cd backend
+docker-compose up -d           # Postgres :6500, Keycloak :9080
+mvn spring-boot:run             # http://localhost:8080
+```
+
+Or run `PrmsApplication` directly from your IDE — set the project SDK to JDK 17 and make
+sure annotation processing is enabled (Lombok generates getters/builders/etc. at compile
+time; the Lombok IDE plugin avoids false-positive red squiggles).
+
+On first boot (skipped under the `test` profile), `ResourceSeeder`/`CrewLeadSeeder`/
+`PassengerSeeder` populate the ship's base resource inventory and mirror the Keycloak
+realm's seeded users into the app's own tables, so there's data to explore immediately:
+
+| Username | Role | Membership level |
+| --- | --- | --- |
+| `so90667` | Crew Lead | — |
+| `yg91185` | Crew Lead | — |
+| `mh91004` | Crew Lead | — |
+| `bn89820` | Passenger | SILVER |
+| `mp89242` | Passenger | GOLD |
+| `zc90663` | Passenger | PLATINUM |
+
+### API docs
+
+Swagger UI: http://localhost:8080/swagger-ui.html — click **Authorize** and paste a
+Keycloak-issued bearer token to call protected endpoints.
+
+Get a token (client secret is in `backend/realm-config/RIFTKeycloak-realm.json`):
+
+```bash
+curl -s -X POST http://localhost:9080/auth/realms/RIFTKeycloak/protocol/openid-connect/token \
+  -d 'grant_type=password' \
+  -d 'client_id=rift-client' \
+  -d 'client_secret=<from realm-config>' \
+  -d 'username=so90667' \
+  -d 'password=<the Keycloak password for that user>'
+```
+
+### Tests
+
+```bash
+mvn test
+```
+
+### Tech stack
+
+Java 17 · Spring Boot 3.3 · Spring Security (OAuth2 Resource Server, JWT) · Spring Data
+JPA · PostgreSQL · Lombok · MapStruct · springdoc-openapi (Swagger UI)
 
 ## Frontend
 
