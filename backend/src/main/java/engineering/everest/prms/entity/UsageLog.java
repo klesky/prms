@@ -2,7 +2,6 @@ package engineering.everest.prms.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,11 +29,18 @@ public class UsageLog {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    /*
+     * Eager on purpose: every caller of this entity (recordUsage response, personal
+     * history, resource analytics) needs the passenger/resource details to build its
+     * DTO, and DTO mapping happens in the controller layer, after the service's
+     * transaction/session has already closed - lazy loading here would throw
+     * LazyInitializationException regardless of where @Transactional is placed.
+     */
+    @ManyToOne(optional = false)
     @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger passenger;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "resource_id", nullable = false)
     private Resource resource;
 

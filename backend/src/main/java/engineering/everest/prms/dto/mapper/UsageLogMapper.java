@@ -6,6 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper
 public interface UsageLogMapper {
 
@@ -15,4 +17,6 @@ public interface UsageLogMapper {
     @Mapping(source = "resource.id", target = "resourceId")
     @Mapping(source = "resource.name", target = "resourceName")
     UsageLogDto entityToDto(UsageLog usageLog);
+
+    List<UsageLogDto> entityToDtoList(List<UsageLog> usageLogs);
 }

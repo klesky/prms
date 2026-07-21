@@ -8,8 +8,10 @@ export type { OpenAPIConfig } from "./core/OpenAPI";
 
 export type { CrewLeadDto } from "./models/CrewLeadDto";
 export type { CurrentUserDto } from "./models/CurrentUserDto";
+export type { MembershipLevelUsageReportDto } from "./models/MembershipLevelUsageReportDto";
 export type { PassengerDto } from "./models/PassengerDto";
 export type { ResourceDto } from "./models/ResourceDto";
+export type { ResourceUsageCountDto } from "./models/ResourceUsageCountDto";
 export type { UsageLogDto } from "./models/UsageLogDto";
 
 export { CrewLeadsService } from "./services/CrewLeadsService";

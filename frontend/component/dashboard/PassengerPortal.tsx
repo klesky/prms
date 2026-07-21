@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { useMutation, useQueries } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Card, Col, Row, Spin, Tag, Typography, message } from "antd";
 import { HistoryOutlined, LockOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { PassengersService, ResourcesService, ResourceDto, UsageLogDto, UsageLogsService } from "open-api";
+import { PassengersService, ResourcesService, ResourceDto, UsageLogsService } from "open-api";
 import { SessionData } from "../../utils/authUtils";
 import { membershipTagColor } from "../../utils/membership";
 import { getApiErrorMessage } from "../../utils/apiError";
@@ -14,8 +13,9 @@ const { Title, Paragraph, Text } = Typography;
 const PassengerPortal = () => {
   const { data } = useSession();
   const session = data as SessionData;
+  const queryClient = useQueryClient();
 
-  const [allResourcesQuery, accessibleResourcesQuery] = useQueries({
+  const [allResourcesQuery, accessibleResourcesQuery, usageHistoryQuery] = useQueries({
     queries: [
       {
         queryKey: ["resources"],
@@ -27,23 +27,25 @@ const PassengerPortal = () => {
           PassengersService.getAccessibleResources({ username: session.username! }),
         enabled: !!session.username,
       },
+      {
+        queryKey: ["usageHistory", session.username],
+        queryFn: () => UsageLogsService.getMyUsageHistory(),
+        enabled: !!session.username,
+      },
     ],
   });
-
-  // Session-only: the backend has no endpoint to read usage history back, so this list
-  // only reflects "Use Now" clicks made in this browser tab and resets on reload.
-  const [recentActivity, setRecentActivity] = useState<UsageLogDto[]>([]);
 
   const recordUsage = useMutation({
     mutationFn: (resourceId: string) => UsageLogsService.recordUsage({ requestBody: resourceId }),
     onSuccess: (dto) => {
       message.success(`Used ${dto.resourceName}`);
-      setRecentActivity((prev) => [dto, ...prev]);
+      queryClient.invalidateQueries({ queryKey: ["usageHistory", session.username] });
     },
     onError: (err) => message.error(getApiErrorMessage(err)),
   });
 
-  const isLoading = allResourcesQuery.isLoading || accessibleResourcesQuery.isLoading;
+  const isLoading =
+    allResourcesQuery.isLoading || accessibleResourcesQuery.isLoading || usageHistoryQuery.isLoading;
   const isError = allResourcesQuery.isError || accessibleResourcesQuery.isError;
 
   if (isLoading) {
@@ -55,6 +57,7 @@ const PassengerPortal = () => {
   }
 
   const accessibleIds = new Set((accessibleResourcesQuery.data ?? []).map((r) => r.id));
+  const usageHistory = usageHistoryQuery.data ?? [];
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 24, alignItems: "start" }}>
@@ -72,7 +75,7 @@ const PassengerPortal = () => {
         <Row gutter={[14, 14]}>
           {(allResourcesQuery.data ?? []).map((resource: ResourceDto) => {
             const unlocked = accessibleIds.has(resource.id);
-            const useCount = recentActivity.filter((a) => a.resourceId === resource.id).length;
+            const useCount = usageHistory.filter((a) => a.resourceId === resource.id).length;
             const isUsingThis = recordUsage.isPending && recordUsage.variables === resource.id;
 
             return (
@@ -103,7 +106,7 @@ const PassengerPortal = () => {
                         Use Now
                       </Button>
                       <div style={{ fontSize: 11, color: "#8c8c8c", marginTop: 8, textAlign: "center" }}>
-                        Used {useCount} {useCount === 1 ? "time" : "times"} this session
+                        Used {useCount} {useCount === 1 ? "time" : "times"}
                       </div>
                     </>
                   ) : (
@@ -141,20 +144,24 @@ const PassengerPortal = () => {
           </>
         }
       >
-        {recentActivity.length === 0 ? (
-          <Text type="secondary">No resources used yet this session.</Text>
+        {usageHistoryQuery.isError ? (
+          <Alert type="error" showIcon message="Failed to load usage history" />
+        ) : usageHistory.length === 0 ? (
+          <Text type="secondary">No resources used yet.</Text>
         ) : (
-          recentActivity.map((entry, i) => (
-            <div
-              key={entry.id ?? i}
-              style={{ padding: "8px 0", borderBottom: "1px solid #f5f5f5" }}
-            >
-              <div style={{ fontSize: 13 }}>{entry.resourceName}</div>
-              <div style={{ fontSize: 11, color: "#8c8c8c" }}>
-                {entry.occurredAt ? dayjs(entry.occurredAt).format("MMM D, HH:mm") : ""}
+          <div style={{ maxHeight: 480, overflow: "auto" }}>
+            {usageHistory.map((entry, i) => (
+              <div
+                key={entry.id ?? i}
+                style={{ padding: "8px 0", borderBottom: "1px solid #f5f5f5" }}
+              >
+                <div style={{ fontSize: 13 }}>{entry.resourceName}</div>
+                <div style={{ fontSize: 11, color: "#8c8c8c" }}>
+                  {entry.occurredAt ? dayjs(entry.occurredAt).format("MMM D, HH:mm") : ""}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </Card>
     </div>

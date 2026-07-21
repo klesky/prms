@@ -38,6 +38,8 @@ import {
 import type { MembershipLevel } from "../../utils/authUtils";
 import { SessionData } from "../../utils/authUtils";
 import { MEMBERSHIP_LEVELS, membershipTagColor } from "../../utils/membership";
+import MembershipLevelReport from "./MembershipLevelReport";
+import ResourceUsageReport from "./ResourceUsageReport";
 import { getApiErrorMessage } from "../../utils/apiError";
 
 const { Title } = Typography;
@@ -361,6 +363,9 @@ const CrewLeadDashboard = () => {
           />
         )}
       </Card>
+
+      <MembershipLevelReport />
+      <ResourceUsageReport />
 
       <Modal
         title={
